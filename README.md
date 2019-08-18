@@ -5,7 +5,7 @@ The government of Uganda rolled out a school feeding program in selected distric
 - `1 = Treatment`
 - `0 = Control`
 
-Attached alongside this file is a data file named: `School data.csv`
+Attached alongside this file is a data file named: `School data.xlsx`
 
 - Your task is to assess the impact of the programme on school attendance.
 
