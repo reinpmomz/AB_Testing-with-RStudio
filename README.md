@@ -9,6 +9,6 @@ Attached alongside this file is a data file named: `School data.csv`
 
 - Your task is to assess the impact of the programme on school attendance.
 
-##Description of the dataset
+## Description of the dataset
 
 The Excel workbook contains two worksheets; one with the data on attendance and the other contains the district names. Each row of data contains data for each school within the district.
