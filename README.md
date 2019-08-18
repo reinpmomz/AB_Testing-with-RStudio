@@ -4,6 +4,7 @@ Assess the impact on attendance rates in public primary schools by providing fre
 The government of Uganda rolled out a school feeding program in selected districts to provide primary school pupils with a free meal on school days with the hope of increasing attendance rates in public primary schools. Schools in each district were randomly assigned to treatment and control groups. 
 - `1 = Treatment`
 - `0 = Control`
+
 Attached alongside this file is a data file named: `School data.csv`
 
 - Your task is to assess the impact of the programme on school attendance.
