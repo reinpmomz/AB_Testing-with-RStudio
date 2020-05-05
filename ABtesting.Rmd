@@ -1,11 +1,24 @@
 ---
 title: "AB_Testing"
+author: "Reinp"
+date: "`r Sys.Date()`"
 output:
+  pdf_document: default
+  word_document: default
   html_document: 
     keep_md: yes
-  word_document: default
-  pdf_document: default
 ---
+
+## Set Chunk requirements
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+#echo=FALSE indicates that the code will not be shown in the final document 
+#(though any results/output would still be displayed).
+#include=FALSE to have the chunk evaluated, but neither the code nor its output displayed
+# warning=FALSE and message=FALSE suppress any R warnings or messages from being included 
+#in the final document
+```
 
 
 ```{r Import relevant packages}

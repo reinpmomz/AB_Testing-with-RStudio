@@ -1,11 +1,25 @@
 ---
 title: "AB_Testing"
+author: "Reinp"
+date: "2020-05-05"
 output:
   html_document: 
     keep_md: yes
   word_document: default
   pdf_document: default
 ---
+
+## Set Chunk requirements
+
+
+```r
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+#echo=FALSE indicates that the code will not be shown in the final document 
+#(though any results/output would still be displayed).
+#include=FALSE to have the chunk evaluated, but neither the code nor its output displayed
+# warning=FALSE and message=FALSE suppress any R warnings or messages from being included 
+#in the final document
+```
 
 
 
@@ -14,21 +28,6 @@ output:
 library(stats)
 library(psych)
 library(ggplot2)
-```
-
-```
-## Warning: package 'ggplot2' was built under R version 3.6.1
-```
-
-```
-## 
-## Attaching package: 'ggplot2'
-```
-
-```
-## The following objects are masked from 'package:psych':
-## 
-##     %+%, alpha
 ```
 
 
@@ -58,13 +57,6 @@ help(ds_sd)
 
 ```r
 ??ds_sd
-```
-
-```
-## starting httpd help server ... done
-```
-
-```r
 str(ds_sd)
 ```
 
@@ -124,10 +116,10 @@ table(ds_sd$district_id)
 
 ```
 ## 
-##   3   5   6  16  17  22  39  42  43  44  47  50  57  58  62  65  67  68 
-## 253 279 256 302 218 227 274 225 248 237 222 241 294 251 239 290 260 243 
-##  77  78  79  80  93  97 104 107 108 200 
-## 260 270 319 288 245 247 233 254 295  14
+##   3   5   6  16  17  22  39  42  43  44  47  50  57  58  62  65  67  68  77  78 
+## 253 279 256 302 218 227 274 225 248 237 222 241 294 251 239 290 260 243 260 270 
+##  79  80  93  97 104 107 108 200 
+## 319 288 245 247 233 254 295  14
 ```
 
 ```r
@@ -136,10 +128,10 @@ table(ds_sd1$"DISTRICT ID")
 
 ```
 ## 
-##   1   2   3   5   6  16  17  22  39  42  43  44  47  50  57  58  62  65 
-##   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1 
-##  67  68  77  78  79  80  93  97 104 107 108 112 
-##   1   1   1   1   1   1   1   1   1   1   1   1
+##   1   2   3   5   6  16  17  22  39  42  43  44  47  50  57  58  62  65  67  68 
+##   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1 
+##  77  78  79  80  93  97 104 107 108 112 
+##   1   1   1   1   1   1   1   1   1   1
 ```
 
 
@@ -149,8 +141,8 @@ unique(ds_sd$district_id)
 ```
 
 ```
-##  [1]  78  79   3  80  39   5   6  16  17  22  42  43  93  44  97  47  50
-## [18]  57  58  62 104  65 107 108  67  68  77 200
+##  [1]  78  79   3  80  39   5   6  16  17  22  42  43  93  44  97  47  50  57  58
+## [20]  62 104  65 107 108  67  68  77 200
 ```
 
 ```r
@@ -158,8 +150,8 @@ unique(ds_sd1$"DISTRICT ID")
 ```
 
 ```
-##  [1]  78  79   3  80  39   5   6  16  17  22  42  43  93  44  97  47  50
-## [18]  57  58  62 104  65 107 108  67  68  77 112   1   2
+##  [1]  78  79   3  80  39   5   6  16  17  22  42  43  93  44  97  47  50  57  58
+## [20]  62 104  65 107 108  67  68  77 112   1   2
 ```
 
 
@@ -217,30 +209,6 @@ ds_sdmerge2$total_attended <- apply(ds_sdmerge2[,c('attended_male', 'attended_fe
 
 #tidyverse's dplyr
 library(dplyr)
-```
-
-```
-## Warning: package 'dplyr' was built under R version 3.6.1
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 ds_sdmerge3 <- mutate(ds_sdmerge3, total_enrolled = enrolled_male_students +
                         enrolled_female_students)
 ds_sdmerge3 <- mutate(ds_sdmerge3, total_attended = attended_male + attended_female)
@@ -260,20 +228,20 @@ summary(ds_sdmerge) #summarizes the dataset
 ##  Mean   : 57.27   Mean   :253.3   Mean   :211.6   Mean   : 531.9        
 ##  3rd Qu.: 79.00   3rd Qu.:308.0   3rd Qu.:257.0   3rd Qu.: 730.0        
 ##  Max.   :108.00   Max.   :597.0   Max.   :483.0   Max.   :1194.0        
-##  enrolled_female_students   treatment      District Name     
-##  Min.   :-999.0           Min.   :0.0000   Length:6970       
-##  1st Qu.: 268.0           1st Qu.:0.0000   Class :character  
-##  Median : 394.0           Median :0.0000   Mode  :character  
-##  Mean   : 438.7           Mean   :0.4973                     
-##  3rd Qu.: 600.8           3rd Qu.:1.0000                     
-##  Max.   : 991.0           Max.   :1.0000                     
-##  total_enrolled    total_attended  
-##  Min.   :-1998.0   Min.   :   0.0  
-##  1st Qu.:  592.0   1st Qu.: 353.0  
-##  Median :  870.5   Median : 456.0  
-##  Mean   :  970.7   Mean   : 464.9  
-##  3rd Qu.: 1331.8   3rd Qu.: 564.0  
-##  Max.   : 1999.0   Max.   :1045.0
+##  enrolled_female_students   treatment      District Name      total_enrolled   
+##  Min.   :-999.0           Min.   :0.0000   Length:6970        Min.   :-1998.0  
+##  1st Qu.: 268.0           1st Qu.:0.0000   Class :character   1st Qu.:  592.0  
+##  Median : 394.0           Median :0.0000   Mode  :character   Median :  870.5  
+##  Mean   : 438.7           Mean   :0.4973                      Mean   :  970.7  
+##  3rd Qu.: 600.8           3rd Qu.:1.0000                      3rd Qu.: 1331.8  
+##  Max.   : 991.0           Max.   :1.0000                      Max.   : 1999.0  
+##  total_attended  
+##  Min.   :   0.0  
+##  1st Qu.: 353.0  
+##  Median : 456.0  
+##  Mean   : 464.9  
+##  3rd Qu.: 564.0  
+##  Max.   :1045.0
 ```
 
 ```r
@@ -281,40 +249,26 @@ describe(ds_sdmerge)
 ```
 
 ```
-## Warning in describe(ds_sdmerge): NAs introduced by coercion
-```
-
-```
-## Warning in FUN(newX[, i], ...): no non-missing arguments to min; returning
-## Inf
-```
-
-```
-## Warning in FUN(newX[, i], ...): no non-missing arguments to max; returning
-## -Inf
-```
-
-```
-##                          vars    n   mean     sd median trimmed    mad
-## district_id                 1 6970  57.27  31.22   58.0   57.68  29.65
-## attended_male               2 6970 253.31  85.78  247.0  249.84  87.47
-## attended_female             3 6970 211.62  70.68  207.0  208.50  71.16
-## enrolled_male_students      4 6970 531.93 266.40  479.0  518.04 276.50
-## enrolled_female_students    5 6970 438.73 222.13  394.0  427.54 223.87
-## treatment                   6 6970   0.50   0.50    0.0    0.50   0.00
-## District Name*              7 6970    NaN     NA     NA     NaN     NA
-## total_enrolled              8 6970 970.66 485.92  870.5  946.60 496.67
-## total_attended              9 6970 464.93 153.75  456.0  458.95 157.16
-##                            min  max range  skew kurtosis   se
-## district_id                  3  108   105 -0.15    -0.92 0.37
-## attended_male                0  597   597  0.39     0.09 1.03
-## attended_female              0  483   483  0.42     0.13 0.85
-## enrolled_male_students    -999 1194  2193 -0.12     2.20 3.19
-## enrolled_female_students  -999  991  1990 -0.38     4.23 2.66
-## treatment                    0    1     1  0.01    -2.00 0.01
-## District Name*             Inf -Inf  -Inf    NA       NA   NA
-## total_enrolled           -1998 1999  3997 -0.26     3.07 5.82
-## total_attended               0 1045  1045  0.36     0.03 1.84
+##                          vars    n   mean     sd median trimmed    mad   min
+## district_id                 1 6970  57.27  31.22   58.0   57.68  29.65     3
+## attended_male               2 6970 253.31  85.78  247.0  249.84  87.47     0
+## attended_female             3 6970 211.62  70.68  207.0  208.50  71.16     0
+## enrolled_male_students      4 6970 531.93 266.40  479.0  518.04 276.50  -999
+## enrolled_female_students    5 6970 438.73 222.13  394.0  427.54 223.87  -999
+## treatment                   6 6970   0.50   0.50    0.0    0.50   0.00     0
+## District Name*              7 6970    NaN     NA     NA     NaN     NA   Inf
+## total_enrolled              8 6970 970.66 485.92  870.5  946.60 496.67 -1998
+## total_attended              9 6970 464.93 153.75  456.0  458.95 157.16     0
+##                           max range  skew kurtosis   se
+## district_id               108   105 -0.15    -0.92 0.37
+## attended_male             597   597  0.39     0.09 1.03
+## attended_female           483   483  0.42     0.13 0.85
+## enrolled_male_students   1194  2193 -0.12     2.20 3.19
+## enrolled_female_students  991  1990 -0.38     4.23 2.66
+## treatment                   1     1  0.01    -2.00 0.01
+## District Name*           -Inf  -Inf    NA       NA   NA
+## total_enrolled           1999  3997 -0.26     3.07 5.82
+## total_attended           1045  1045  0.36     0.03 1.84
 ```
 
 
@@ -337,17 +291,16 @@ head(ds_sdmerger)
 ```
 ## # A tibble: 6 x 10
 ## # Groups:   district_id [1]
-##   district_id attended_male attended_female enrolled_male_s~
-##         <dbl>         <dbl>           <dbl>            <dbl>
-## 1           3           212             177             1020
-## 2           3           335             331              985
-## 3           3           261             186             1139
-## 4           3           208             166             1014
-## 5           3           238             184             1050
-## 6           3           112              75             1016
-## # ... with 6 more variables: enrolled_female_students <dbl>,
-## #   treatment <dbl>, `District Name` <chr>, total_enrolled <dbl>,
-## #   total_attended <dbl>, school_id <int>
+##   district_id attended_male attended_female enrolled_male_s~ enrolled_female~
+##         <dbl>         <dbl>           <dbl>            <dbl>            <dbl>
+## 1           3           212             177             1020              959
+## 2           3           335             331              985              962
+## 3           3           261             186             1139              807
+## 4           3           208             166             1014              920
+## 5           3           238             184             1050              881
+## 6           3           112              75             1016              908
+## # ... with 5 more variables: treatment <dbl>, `District Name` <chr>,
+## #   total_enrolled <dbl>, total_attended <dbl>, school_id <int>
 ```
 
 ```r
@@ -357,17 +310,16 @@ tail(ds_sdmerger)
 ```
 ## # A tibble: 6 x 10
 ## # Groups:   district_id [1]
-##   district_id attended_male attended_female enrolled_male_s~
-##         <dbl>         <dbl>           <dbl>            <dbl>
-## 1         108           118              97              136
-## 2         108            73              55              126
-## 3         108            66              64              112
-## 4         108           242             230             -999
-## 5         108           156             162             -999
-## 6         108           239             222             -999
-## # ... with 6 more variables: enrolled_female_students <dbl>,
-## #   treatment <dbl>, `District Name` <chr>, total_enrolled <dbl>,
-## #   total_attended <dbl>, school_id <int>
+##   district_id attended_male attended_female enrolled_male_s~ enrolled_female~
+##         <dbl>         <dbl>           <dbl>            <dbl>            <dbl>
+## 1         108           118              97              136              110
+## 2         108            73              55              126              106
+## 3         108            66              64              112              108
+## 4         108           242             230             -999             -999
+## 5         108           156             162             -999             -999
+## 6         108           239             222             -999             -999
+## # ... with 5 more variables: treatment <dbl>, `District Name` <chr>,
+## #   total_enrolled <dbl>, total_attended <dbl>, school_id <int>
 ```
 
 
@@ -377,42 +329,28 @@ describe(ds_sdmerger)
 ```
 
 ```
-## Warning in describe(ds_sdmerger): NAs introduced by coercion
-```
-
-```
-## Warning in FUN(newX[, i], ...): no non-missing arguments to min; returning
-## Inf
-```
-
-```
-## Warning in FUN(newX[, i], ...): no non-missing arguments to max; returning
-## -Inf
-```
-
-```
-##                          vars    n   mean     sd median trimmed    mad
-## district_id                 1 6970  57.27  31.22   58.0   57.68  29.65
-## attended_male               2 6970 253.31  85.78  247.0  249.84  87.47
-## attended_female             3 6970 211.62  70.68  207.0  208.50  71.16
-## enrolled_male_students      4 6970 531.93 266.40  479.0  518.04 276.50
-## enrolled_female_students    5 6970 438.73 222.13  394.0  427.54 223.87
-## treatment                   6 6970   0.50   0.50    0.0    0.50   0.00
-## District Name*              7 6970    NaN     NA     NA     NaN     NA
-## total_enrolled              8 6970 970.66 485.92  870.5  946.60 496.67
-## total_attended              9 6970 464.93 153.75  456.0  458.95 157.16
-## school_id                  10 6970 130.90  76.85  130.0  129.61  96.37
-##                            min  max range  skew kurtosis   se
-## district_id                  3  108   105 -0.15    -0.92 0.37
-## attended_male                0  597   597  0.39     0.09 1.03
-## attended_female              0  483   483  0.42     0.13 0.85
-## enrolled_male_students    -999 1194  2193 -0.12     2.20 3.19
-## enrolled_female_students  -999  991  1990 -0.38     4.23 2.66
-## treatment                    0    1     1  0.01    -2.00 0.01
-## District Name*             Inf -Inf  -Inf    NA       NA   NA
-## total_enrolled           -1998 1999  3997 -0.26     3.07 5.82
-## total_attended               0 1045  1045  0.36     0.03 1.84
-## school_id                    1  319   318  0.11    -1.04 0.92
+##                          vars    n   mean     sd median trimmed    mad   min
+## district_id                 1 6970  57.27  31.22   58.0   57.68  29.65     3
+## attended_male               2 6970 253.31  85.78  247.0  249.84  87.47     0
+## attended_female             3 6970 211.62  70.68  207.0  208.50  71.16     0
+## enrolled_male_students      4 6970 531.93 266.40  479.0  518.04 276.50  -999
+## enrolled_female_students    5 6970 438.73 222.13  394.0  427.54 223.87  -999
+## treatment                   6 6970   0.50   0.50    0.0    0.50   0.00     0
+## District Name*              7 6970    NaN     NA     NA     NaN     NA   Inf
+## total_enrolled              8 6970 970.66 485.92  870.5  946.60 496.67 -1998
+## total_attended              9 6970 464.93 153.75  456.0  458.95 157.16     0
+## school_id                  10 6970 130.90  76.85  130.0  129.61  96.37     1
+##                           max range  skew kurtosis   se
+## district_id               108   105 -0.15    -0.92 0.37
+## attended_male             597   597  0.39     0.09 1.03
+## attended_female           483   483  0.42     0.13 0.85
+## enrolled_male_students   1194  2193 -0.12     2.20 3.19
+## enrolled_female_students  991  1990 -0.38     4.23 2.66
+## treatment                   1     1  0.01    -2.00 0.01
+## District Name*           -Inf  -Inf    NA       NA   NA
+## total_enrolled           1999  3997 -0.26     3.07 5.82
+## total_attended           1045  1045  0.36     0.03 1.84
+## school_id                 319   318  0.11    -1.04 0.92
 ```
 
 ```r
@@ -444,42 +382,28 @@ describe(ds_sdmerger1)
 ```
 
 ```
-## Warning in describe(ds_sdmerger1): NAs introduced by coercion
-```
-
-```
-## Warning in FUN(newX[, i], ...): no non-missing arguments to min; returning
-## Inf
-```
-
-```
-## Warning in FUN(newX[, i], ...): no non-missing arguments to max; returning
-## -Inf
-```
-
-```
-##                          vars    n   mean     sd median trimmed    mad min
-## district_id                 1 6948  57.27  31.22   58.0   57.67  29.65   3
-## attended_male               2 6948 253.42  85.76  247.0  249.93  87.47   0
-## attended_female             3 6948 211.71  70.67  207.0  208.57  71.16   0
-## enrolled_male_students      4 6948 536.78 252.49  481.0  519.18 277.25 106
-## enrolled_female_students    5 6948 443.28 207.20  395.0  428.48 223.87  88
-## treatment                   6 6948   0.50   0.50    0.0    0.50   0.00   0
-## District Name*              7 6948    NaN     NA     NA     NaN     NA Inf
-## total_enrolled              8 6948 980.06 457.02  873.5  948.68 495.93 204
-## total_attended              9 6948 465.13 153.72  456.0  459.11 157.16   0
-## school_id                  10 6948 130.49  76.62  129.0  129.21  94.89   1
-##                           max range  skew kurtosis   se
-## district_id               108   105 -0.15    -0.92 0.37
-## attended_male             597   597  0.40     0.08 1.03
-## attended_female           483   483  0.42     0.12 0.85
-## enrolled_male_students   1194  1088  0.50    -0.86 3.03
-## enrolled_female_students  991   903  0.52    -0.81 2.49
-## treatment                   1     1  0.01    -2.00 0.01
-## District Name*           -Inf  -Inf    NA       NA   NA
-## total_enrolled           1999  1795  0.49    -0.90 5.48
-## total_attended           1045  1045  0.37     0.03 1.84
-## school_id                 319   318  0.11    -1.04 0.92
+##                          vars    n   mean     sd median trimmed    mad min  max
+## district_id                 1 6948  57.27  31.22   58.0   57.67  29.65   3  108
+## attended_male               2 6948 253.42  85.76  247.0  249.93  87.47   0  597
+## attended_female             3 6948 211.71  70.67  207.0  208.57  71.16   0  483
+## enrolled_male_students      4 6948 536.78 252.49  481.0  519.18 277.25 106 1194
+## enrolled_female_students    5 6948 443.28 207.20  395.0  428.48 223.87  88  991
+## treatment                   6 6948   0.50   0.50    0.0    0.50   0.00   0    1
+## District Name*              7 6948    NaN     NA     NA     NaN     NA Inf -Inf
+## total_enrolled              8 6948 980.06 457.02  873.5  948.68 495.93 204 1999
+## total_attended              9 6948 465.13 153.72  456.0  459.11 157.16   0 1045
+## school_id                  10 6948 130.49  76.62  129.0  129.21  94.89   1  319
+##                          range  skew kurtosis   se
+## district_id                105 -0.15    -0.92 0.37
+## attended_male              597  0.40     0.08 1.03
+## attended_female            483  0.42     0.12 0.85
+## enrolled_male_students    1088  0.50    -0.86 3.03
+## enrolled_female_students   903  0.52    -0.81 2.49
+## treatment                    1  0.01    -2.00 0.01
+## District Name*            -Inf    NA       NA   NA
+## total_enrolled            1795  0.49    -0.90 5.48
+## total_attended            1045  0.37     0.03 1.84
+## school_id                  318  0.11    -1.04 0.92
 ```
 
 
@@ -576,49 +500,8 @@ main="Total Sum Attended BoxPlot")
 ```r
 #finding a fitting distribution for the total attended variable
 library(car)
-```
-
-```
-## Warning: package 'car' was built under R version 3.6.1
-```
-
-```
-## Loading required package: carData
-```
-
-```
-## 
-## Attaching package: 'car'
-```
-
-```
-## The following object is masked from 'package:dplyr':
-## 
-##     recode
-```
-
-```
-## The following object is masked from 'package:psych':
-## 
-##     logit
-```
-
-```r
 library(MASS) #So that distributions that must be non-zero can make sense of my data
-```
 
-```
-## 
-## Attaching package: 'MASS'
-```
-
-```
-## The following object is masked from 'package:dplyr':
-## 
-##     select
-```
-
-```r
 qqp(ds_sdmerger1$total_attended+1, "norm", main="Normal model")
 ```
 
@@ -650,13 +533,6 @@ qqp(ds_sdmerger1$total_attended+1, "lnorm", main="LogNormal model") #lnorm means
 #countable events or the probability of these events
 
 nbinom <- fitdistr(ds_sdmerger1$total_attended+1, "Negative Binomial")
-```
-
-```
-## Warning in densfun(x, parm[1], parm[2], ...): NaNs produced
-```
-
-```r
 qqp(ds_sdmerger1$total_attended+1, "nbinom", size = nbinom$estimate[[1]], mu =
       nbinom$estimate[[2]], main="Negative Binomial model")
 ```
@@ -680,25 +556,6 @@ qqp(ds_sdmerger1$total_attended+1, "pois", lambda=pois$estimate, main="Poisson m
 
 ```r
 gamma <- fitdistr(ds_sdmerger1$total_attended+1, "gamma")
-```
-
-```
-## Warning in densfun(x, parm[1], parm[2], ...): NaNs produced
-```
-
-```
-## Warning in densfun(x, parm[1], parm[2], ...): NaNs produced
-
-## Warning in densfun(x, parm[1], parm[2], ...): NaNs produced
-
-## Warning in densfun(x, parm[1], parm[2], ...): NaNs produced
-
-## Warning in densfun(x, parm[1], parm[2], ...): NaNs produced
-
-## Warning in densfun(x, parm[1], parm[2], ...): NaNs produced
-```
-
-```r
 qqp(ds_sdmerger1$total_attended+1, "gamma", shape = gamma$estimate[[1]], rate =
       gamma$estimate[[2]], main="Gamma model")
 ```
@@ -752,22 +609,6 @@ qqp(ds_sdmerger1$total_attended+1, "gamma", shape = gamma$estimate[[1]], rate =
 
 ```r
 library(lme4)
-```
-
-```
-## Loading required package: Matrix
-```
-
-```
-## Registered S3 methods overwritten by 'lme4':
-##   method                          from
-##   cooks.distance.influence.merMod car 
-##   influence.merMod                car 
-##   dfbeta.influence.merMod         car 
-##   dfbetas.influence.merMod        car
-```
-
-```r
 #1.We construct the null model first. 
 #H0 (called the null hypothesis ): There is no relationship between the two variables.
 
@@ -981,12 +822,9 @@ anova(lmmtreatment.null,lmmtreatment)
 ## Models:
 ## lmmtreatment.null: total_attended ~ total_enrolled + (1 | district_id)
 ## lmmtreatment: total_attended ~ treatment + total_enrolled + (1 | district_id)
-##                   Df   AIC   BIC logLik deviance  Chisq Chi Df Pr(>Chisq)
-## lmmtreatment.null  4 88998 89026 -44495    88990                         
-## lmmtreatment       5 88995 89029 -44492    88985 5.8116      1    0.01592
-##                    
-## lmmtreatment.null  
-## lmmtreatment      *
+##                   Df   AIC   BIC logLik deviance  Chisq Chi Df Pr(>Chisq)  
+## lmmtreatment.null  4 88998 89026 -44495    88990                           
+## lmmtreatment       5 88995 89029 -44492    88985 5.8116      1    0.01592 *
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -1147,12 +985,9 @@ anova(lmmtreatmentRS.null,lmmtreatmentRS)
 ## lmmtreatmentRS.null: total_attended ~ total_enrolled + (1 + treatment | district_id)
 ## lmmtreatmentRS: total_attended ~ treatment + total_enrolled + (1 + treatment | 
 ## lmmtreatmentRS:     district_id)
-##                     Df   AIC   BIC logLik deviance  Chisq Chi Df
-## lmmtreatmentRS.null  6 88977 89019 -44483    88965              
-## lmmtreatmentRS       7 88977 89025 -44482    88963 2.3481      1
-##                     Pr(>Chisq)
-## lmmtreatmentRS.null           
-## lmmtreatmentRS          0.1254
+##                     Df   AIC   BIC logLik deviance  Chisq Chi Df Pr(>Chisq)
+## lmmtreatmentRS.null  6 88977 89019 -44483    88965                         
+## lmmtreatmentRS       7 88977 89025 -44482    88963 2.3481      1     0.1254
 ```
 
 ```r
