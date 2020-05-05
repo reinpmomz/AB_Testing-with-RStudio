@@ -9,10 +9,10 @@ output:
   pdf_document: default
 ---
 
-## Set Chunk requirements
 
 
 ```r
+## Set Chunk requirements
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 #echo=FALSE indicates that the code will not be shown in the final document 
 #(though any results/output would still be displayed).

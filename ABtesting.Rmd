@@ -9,9 +9,9 @@ output:
     keep_md: yes
 ---
 
-## Set Chunk requirements
 
 ```{r setup, include=TRUE}
+## Set Chunk requirements
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 #echo=FALSE indicates that the code will not be shown in the final document 
 #(though any results/output would still be displayed).
