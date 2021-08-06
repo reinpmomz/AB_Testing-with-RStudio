@@ -3,45 +3,61 @@ title: "AB_Testing"
 author: "Reinp"
 date: "`r Sys.Date()`"
 output:
-  pdf_document: default
-  word_document: default
   html_document: 
     keep_md: yes
+  word_document: default
+  pdf_document: default
 ---
 
+# R Programming
+
+## Set Chunk requirements
+
+echo=FALSE indicates that the code will not be shown in the final document (though any results/output would still be displayed).
+
+include=FALSE to have the chunk evaluated, but neither the code nor its output displayed
+
+warning=FALSE and message=FALSE suppress any R warnings or messages from being included in the final document
 
 ```{r setup, include=TRUE}
-## Set Chunk requirements
+
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
-#echo=FALSE indicates that the code will not be shown in the final document 
-#(though any results/output would still be displayed).
-#include=FALSE to have the chunk evaluated, but neither the code nor its output displayed
-# warning=FALSE and message=FALSE suppress any R warnings or messages from being included 
-#in the final document
+
 ```
 
+
+## Load relevant packages
 
 ```{r Import relevant packages}
-#Import relevant packages
-library(stats)
+
+library(tidyverse)
+library("readxl")
+#library(stats) Loaded automatically in R library
+
 library(psych)
-library(ggplot2)
+
 ```
+
+
+## Import dataset
 
 ```{r loading dataset }
 #loading the excel dataset with two sheets
-library("readxl")
-setwd('E:/Documents/Reinp/GitHub Respositories/AB_Testing-with-RStudio')
-ds_sd<-read_excel('School data.xlsx', sheet = "Data")
-View(ds_sd)
-attach(ds_sd)
 
-ds_sd1<-read_excel('School data.xlsx', sheet = "District names")
+setwd('F:/Documents/Reinp/GitHub Respositories/AB_Testing-with-RStudio')
+ds_sd<-read_excel('data/School data.xlsx', sheet = "Data")
+View(ds_sd)
+
+
+ds_sd1<-read_excel('data/School data.xlsx', sheet = "District names")
 View(ds_sd1)
-attach(ds_sd1)
+
 ```
 
-```{r structure of data}
+
+## Structure of the Data
+
+```{r structure of data, results='hide'}
 #learn more about the dataset
 help(ds_sd)
 ??ds_sd
@@ -53,8 +69,10 @@ names(ds_sd) #display variable names
 #attributes(ds_sd) #names(ds_sd), class(ds_sd), row.names(ds_sd)
 ```
 
+## distribution of input variables
+
 ```{r distribution of input variables}
-#distribution of input variables
+
 table(ds_sd$district_id)
 table(ds_sd1$"DISTRICT ID")
 ```
@@ -65,12 +83,11 @@ unique(ds_sd$district_id)
 unique(ds_sd1$"DISTRICT ID")
 ```
 
-```{r unique comments}
-#district_id 200 in (ds_sd dataframe) is not in the (ds-sd1 dataframe)
-#DISTRICT ID 1 in (ds_sd1 dataframe) is not in the (ds-sd dataframe)
-#DISTRICT ID 2 in (ds_sd1 dataframe) is not in the (ds-sd dataframe)
-#DISTRICT ID 112 in (ds_sd1 dataframe) is not in the (ds-sd dataframe)
-```
+district_id 200 in (ds_sd dataframe) is not in the (ds-sd1 dataframe).
+
+DISTRICT ID 1, DISTRICT ID 2 and DISTRICT ID 112 in (ds_sd1 dataframe) is not in the (ds-sd dataframe)
+
+## Transforming the data
 
 ```{r merge the data}
 ds_sdmerge <- merge(ds_sd, ds_sd1, by.x = "district_id", by.y = "DISTRICT ID") #N/A. 
@@ -79,27 +96,26 @@ View(ds_sdmerge)
 
 ds_sdmerge1 <- merge(ds_sd, ds_sd1, by.x = "district_id", by.y = "DISTRICT ID", all.x = TRUE)
 #Keep all rows from x, regardless of match in y #leftJoin even if there's no match in y
-View(ds_sdmerge1)
+
 
 ds_sdmerge2 <- merge(ds_sd, ds_sd1, by.x = "district_id", by.y = "DISTRICT ID", all.y = TRUE)
 #Keep all rows from y, regardless of match in x #Rightjoin even if there's no match in x
-View(ds_sdmerge2)
+
 
 ds_sdmerge3 <- merge(ds_sd, ds_sd1, by.x = "district_id", by.y = "DISTRICT ID", all= TRUE)
 #Keep all rows from x AND from y #Outerjoin 
-View(ds_sdmerge3)
 
-#We select default merge for the final data. It keeps rows where there’s a match in both. 
-#we get a total of 6970 schools
 
 ```
 
+We select default merge for the final data. It keeps rows where there’s a match in both. we get a total of 6970 schools
+
+Get the total number of student enrolled and attended in each school.
 
 ```{r add column by Computing the total number of students enrolled and attended in each school}
 #add total_enrolled column by computing the total number of student enrolled and total number 
 #of attended in each school
-#Get the total number of student enrolled in each school by adding enrolled_male_students 
-#and enrolled_female_students columns
+
 
 #Adding by equation
 ds_sdmerge$total_enrolled=ds_sdmerge$enrolled_male_students + ds_sdmerge$enrolled_female_students
@@ -124,16 +140,21 @@ ds_sdmerge3 <- mutate(ds_sdmerge3, total_attended = attended_male + attended_fem
 
 ```
 
+## Summary Statistics
+
 ```{r summary statistics}
 #summary statistics
 summary(ds_sdmerge) #summarizes the dataset
 describe(ds_sdmerge)
 ```
 
+Create the school_id variable by first sorting the data within each district by the total
+number of enrollees per school. Let the ID be 1 for the school within each district with the
+highest number of enrolled students, 2 for the second highest and so on........
+
+## Adding Columns
+
 ```{r Create the school_id column}
-#Create the school_id variable by first sorting the data within each district by the total
-#number of enrollees per school. Let the ID be 1 for the school within each district with the
-#highest number of enrolled students, 2 for the second highest and so on........
 
 ds_sdmerge <- arrange(ds_sdmerge,district_id,desc(total_enrolled))
 
@@ -148,8 +169,10 @@ tail(ds_sdmerger)
 
 ```
 
+## Check the numeric variables for outliers.
+
 ```{r outliers}
-#Check the numeric variables for outliers.
+
 describe(ds_sdmerger)
 
 ## We use boxplot to visualize for any outliers
@@ -163,11 +186,7 @@ border="brown", las = 2, cex.axis = 0.6, col.axis = 'blue', col.lab = 'red')
 
 ```
 
-```{r outliers comments}
-#From the boxplot above, outliers are present in form of negative count of students.
-#There are negative values in enrolled_male_students and in enrolled_female_students leading 
-#to a negative total_enrolled
-```
+From the boxplot above, outliers are present in form of negative count of students. There are negative values in enrolled_male_students and in enrolled_female_students leading to a negative total_enrolled
 
 ```{r clean data from outliers}
 #cleaning data from the outliers
@@ -175,6 +194,7 @@ ds_sdmerger1 <- ds_sdmerger[(ds_sdmerger[,8]>0),]
 View(ds_sdmerger1)
 describe(ds_sdmerger1)
 ```
+
 
 ```{r create Treatment-label column}
 #Label values for the treatment variable appropriately (1 = Treatment, 0 = Control)
@@ -188,9 +208,10 @@ which(is.na(ds_sdmerger1$total_attended)) #check for missing values
 which(!complete.cases(ds_sdmerger1))
 ```
 
+## Create well labelled graphs showing the difference in attendance between treatment and control schools.
+
 ```{r barplot}
-#Create a well labelled graphs showing the difference in attendance between treatment 
-#and control schools.
+
 
 bp1 <- barplot(tapply(ds_sdmerger1$attended_female, ds_sdmerger1$treatment_type, FUN=sum), 
     xlab="treatment_type",ylab="attended_female",col=c("lightblue", "green"), 
@@ -216,8 +237,10 @@ text(bp3, 0, tapply(ds_sdmerger1$total_attended, ds_sdmerger1$treatment_type, FU
      cex=1,pos=3)
 ```
 
+## relationship between treatment_type and total_attended
+
 ```{r boxplot}
-#relationship between treatment_type and total_attended by means of a boxplot
+
 boxplot(attended_female ~ treatment_type,
 col=c("lightblue", "green"),ds_sdmerger1,
 col.axis = 'blue', col.lab = 'red', border="brown",
@@ -236,8 +259,15 @@ main="Total Sum Attended BoxPlot")
 ```
 
 
+## finding a fitting distribution for the total attended variable
+
+qqp requires estimates of the parameters of the negative binomial, Poisson and gamma distributions. You can generate estimates using the fitdistr function.
+
+Binomial and gamma distributions can only handle positive numbers. Poisson distribution can only handle positive whole numbers. Binomial and Poisson distributions are different from the others because they 
+are discrete rather than continuous, which means they quantify distinct, countable events or the probability of these events
+
 ```{r distribution}
-#finding a fitting distribution for the total attended variable
+
 library(car)
 library(MASS) #So that distributions that must be non-zero can make sense of my data
 
@@ -245,15 +275,6 @@ qqp(ds_sdmerger1$total_attended+1, "norm", main="Normal model")
 
 qqp(ds_sdmerger1$total_attended+1, "lnorm", main="LogNormal model") #lnorm means lognormal
 
-# qqp requires estimates of the parameters of the negative binomial, Poisson
-# and gamma distributions. You can generate estimates using the fitdistr
-# function.
-
-#negative binomial and gamma distributions can only handle positive numbers.
-#Poisson distribution can only handle positive whole numbers. 
-#Binomial and Poisson distributions are different from the others because they 
-#are discrete rather than continuous, which means they quantify distinct, 
-#countable events or the probability of these events
 
 nbinom <- fitdistr(ds_sdmerger1$total_attended+1, "Negative Binomial")
 qqp(ds_sdmerger1$total_attended+1, "nbinom", size = nbinom$estimate[[1]], mu =
@@ -267,178 +288,191 @@ qqp(ds_sdmerger1$total_attended+1, "gamma", shape = gamma$estimate[[1]], rate =
       gamma$estimate[[2]], main="Gamma model")
 ```
 
-```{r linear mixed model}
-#Armed with the knowledge of which probability distribution fits best, 
-#we can try fitting a model
+Armed with the knowledge of which probability distribution fits best, we can try fitting a model.
+If data is normally distributed, we can use a linear mixed model (LMM). 
+
+linear models are “fixed-effects-only” models. They have one or more fixed effects and a general error term.
+
+## Linear Mixed Models
+
+A mixed model is similar in many ways to a linear model. It estimates the effects of one or more explanatory variables on a response variable.
+
+The output of a mixed model will give you a list of explanatory values, estimates and confidence intervals of their effect sizes, p-values for each effect, and at least one measure of how well the model fits. 
+
+You should use a mixed model instead of a simple linear model when you have a variable that describes your data sample as a subset of the data you could have collected.
+
+In a mixed model, we add one or more random effects to our fixed effects. These random effects essentially give structure to the error term. this characterizes idiosyncratic variation that is due to individual differences.
 
 
-#A mixed model is similar in many ways to a linear model. 
-#It estimates the effects of one or more explanatory variables on a response variable.
-#The output of a mixed model will give you a list of explanatory values, estimates and
-#confidence intervals of their effect sizes, p-values for each effect, and 
-#at least one measure of how well the model fits. 
-#You should use a mixed model instead of a simple linear model when you have a variable 
-#that describes your data sample as a subset of the data you could have collected.
+load the lme4 package and make a call to the function lmer. 
 
-#In a mixed model, we add one or more random effects to our fixed effects.
-#These random effects essentially give structure to the error term. 
-#this characterizes idiosyncratic variation that is due to individual differences.
+The first argument to the function is a formula that takes the form y ~ x1 + x2 ...etc., where y is the response variable and x1, x2, etc. are explanatory variables. 
 
-#linear models are “fixed-effects-only” models. They have one or more fixed effects and a 
-#general error term.
+Random effects are added in with the explanatory variables. 
 
-#If data is normally distributed, we can use a linear mixed model (LMM). 
-#load the lme4 package and make a call to the function lmer. 
-#The first argument to the function is a formula that takes the form y ~ x1 + x2 ...etc.,
-#where y is the response variable and x1, x2, etc. are explanatory variables. 
-#Random effects are added in with the explanatory variables. 
-#Crossed random effects take the form (1 | r1) + (1 | r2) ... 
-#while nested random effects take the form (1 | r1 / r2).
+Crossed random effects take the form (1 | r1) + (1 | r2) .......while nested random effects take the form (1 | r1 / r2).
 
-#The next argument is where you designate the data frame your variables come from. 
-#This is where you can designate whether the mixed model will estimate the parameters
-#using maximum likelihood or restricted maximum likelihood. 
-#If your random effects are nested, or you have only one random effect, and if your data
-#are balanced (i.e., similar sample sizes in each factor group) set REML to FALSE, 
-#because you can use maximum likelihood. 
-#If your random effects are crossed, don't set the REML argument because it defaults
-#to TRUE anyway.
-```
+The next argument is where you designate the data frame your variables come from. This is where you can designate whether the mixed model will estimate the parameters using maximum likelihood or restricted maximum likelihood. 
 
+If your random effects are nested, or you have only one random effect, and if your data
+are balanced (i.e., similar sample sizes in each factor group) set REML to FALSE, 
+because you can use maximum likelihood. 
+
+If your random effects are crossed, don't set the REML argument because it defaults
+to TRUE anyway.
+
+### 1.We construct the null model first.
+
+H0 (called the null hypothesis ): There is no relationship between the two variables.
 
 ```{r lmmnull}
 library(lme4)
-#1.We construct the null model first. 
-#H0 (called the null hypothesis ): There is no relationship between the two variables.
+library(lmerTest)
 
 lmmtreatment.null <- lmer(total_attended ~ total_enrolled + (1 | district_id), 
                           data = ds_sdmerger1, REML = FALSE)
 summary(lmmtreatment.null)
 
-#The Anova function does a Wald test, which tells us how confident we are of our 
-#estimate of the effect of total enrolled on total attended, and the p-value tells 
-#me that I should not be confident at all.
+
+anova(lmmtreatment.null)
+
+```
+
+
+The Anova function does a Wald test, which tells us how confident we are of our estimate of the fixed effect of total enrolled on total attended, and the p-value tells us whether we should be confident or not confident at all.
+
+
+```{r}
 Anova(lmmtreatment.null)
 ```
 
+
+The fixed effects for total_enrolled(0.05773, t-value=15.09) is significant, therefore, there is a linear upward trend. The average intercept is 410.3
+
+
+### 2.we construct the full model next
+
+H1 (called the alternative hypothesis): There exist a relationship between the two variables.
+
 ```{r lmmfull}
-#2.we construct the full model next
-#H1 (called the alternative hypothesis): There exist a relationship between the two variables.
 
 lmmtreatment <- lmer(total_attended ~ treatment + total_enrolled + (1 | district_id), 
                           data = ds_sdmerger1, REML = FALSE)
 summary(lmmtreatment)
 
-#The Anova function tells us how confident we are of our estimate of the effect of 
-#treatment and total enrolled on total attended, and the p-value tells 
-#me that I should not be confident at all.
+anova(lmmtreatment)
+
+```
+
+
+```{r}
 Anova(lmmtreatment)
 ```
+
+The fixed effects for total_enrolled(0.05785, t-value=15.131) and treatment(8.406, t-value=2.411) are significant, therefore, there is a linear upward trend in both. The average intercept is 406.0
+
 
 ```{r lmm}
 lmmtreat <- lmer(total_attended ~ treatment + (1 | district_id), 
                           data = ds_sdmerger1, REML = FALSE)
 summary(lmmtreat)
 
-#The Anova function tells us how confident we are of our estimate of the effect of 
-#treatment on total attended, and the p-value tells 
-#me that I should not be confident at all.
-Anova(lmmtreat)
+anova(lmmtreat)
 
-#The coefficient “treatment” is the slope for the categorical effect of providing meals.
-#7.691 means that to go from “control” to “treatment”, total attendance increases 
-#by around 8 pupils.
-#attendance is lower in control(no meals provided) than in treatment(meals provided), 
-#by about 8 pupils.
-
-#oftentimes, model intercepts are not particularly meaningful.
-#But this Model intercept is 463.090. If you look back at the boxplot that we constructed
-#earlier, you can see that the value 463.090 seems to fall halfway between control 
-#and treatment(and this is indeed what this intercept represents). 
-#It’s the average of our data for the informal condition
-
-#compared to the other model with the fixed effect total enrolled added, the intercept
-#is particularly off as we didn’t inform our model that there’s total enrolled in 
-#our dataset. the intercept reduces to 406. The coefficient for the effect of treatment 
-#increased to 8.406 from 7.691
-
-#If you want to interpret these results, you’ll most likely need to report some kind 
-#of p-value. 
-#P-value for treatment in the models are significant(less than 0.05) and reduces 
-#from 0.02993 to 0.0159.
-#Unfortunately, p-values for mixed models aren’t as straightforward as they are 
-#for the linear model.
-
-#Rather than getting a p-value straightforwardly from your model, we get a p-value from a
-#comparison of two models.
-
-#Thus we focus on the Likelihood Ratio Test as a means to attain p-values.
-#Likelihood is the probability of seeing the data you collected given your model.
-#The logic of the likelihood ratio test is to compare the likelihood of two models
-#with each other. First, the model without the factor that you’re interested in (the
-#null model), then the model with the factor that you’re interested in.
 ```
 
+```{r}
+Anova(lmmtreat)
+```
+
+The fixed effects for treatment(7.691, t-value=2.2.171) is significant, therefore, there is a linear growth trend in both. The average intercept is 463.09
+
+The coefficient “treatment” is the slope for the categorical effect of providing meals. 7.691 means that to go from “control” to “treatment”, total attendance increases by around 8 pupils. attendance is lower in control(no meals provided) than in treatment(meals provided), by about 8 pupils.
+
+Oftentimes, model intercepts are not particularly meaningful. But this Model intercept is 463.090. If you look back at the boxplot that we constructed earlier, you can see that the value 463.090 seems to fall halfway between control and treatment(and this is indeed what this intercept represents).
+
+It’s the average of our data for the informal condition compared to the other model. With the fixed effect total enrolled added, the intercept is particularly off as we didn’t inform our model that there’s total enrolled in our dataset. the intercept reduces to 406. The coefficient for the effect of treatment increased to 8.406 from 7.691
+
+If you want to interpret these results, you’ll most likely need to report some kind 
+of p-value.  P-value for treatment in the models are significant(less than 0.05) and reduces 
+from 0.02993 to 0.0159.
+
+Unfortunately, p-values for mixed models aren’t as straightforward as they are 
+for the linear model.
+
+Rather than getting a p-value straightforwardly from your model, we get a p-value from a
+comparison of two models.
+
+
+### 3.Comparison of the models
+
+It is useful to test whether random-effects parameters such as the variances of intercept and slope are significance or not to evaluate individual differences. This can be done by comparing the current model with a model without random intercept or slope.
+
+Thus we focus on the Likelihood Ratio Test as a means to attain p-values.
+Likelihood is the probability of seeing the data you collected given your model.
+The logic of the likelihood ratio test is to compare the likelihood of two models
+with each other. First, the model without the factor that you’re interested in (the
+null model), then the model with the factor that you’re interested in.
+
+We have two models to compare with each other: one with the effect in question, one without the effect in question. We perform the likelihood ratio test using the anova() function:
 
 ```{r comparemodels}
-#3. We have two models to compare with each other – one with the effect in
-#question, one without the effect in question. 
-#We perform the likelihood ratio test using the anova() function:
 
 anova(lmmtreatment.null,lmmtreatment)
 
-#we compared a full model (with the fixed effects in question) against a reduced(null) 
-#model without the effects in question. 
-#we conclude that a fixed effect treatment is significant as the difference between the
-#likelihood of these two models is significant.
-
-#treatment(providing primary school pupils with a free meal on school days) affected total 
-#attendance (chisq.(1)=5.8116, p=0.01592), increasing it by about 8.406(8pupils) ± 3.486(3 pupils)
 ```
+
+we compared a full model (with the fixed effects in question) against a reduced(null) 
+model without the effects in question. 
+
+We conclude that a fixed effect treatment is significant as the difference between the
+likelihood of these two models is significant.
+
+treatment(providing primary school pupils with a free meal on school days) affected total 
+attendance (chisq.(1)=5.8116, p=0.01592), increasing it by about 8.406(8pupils) ± 3.486(3 pupils)
+
 
 ```{r Random intercepts}
 
 coef(lmmtreatment)
 
-#You see that each district is assigned a different intercept given that we’ve told the 
-#model with “(1|district_id)”
-
-#Note also that the fixed effects (treatment and total_enrolled) are all the same for all
-#district_id. Our model is what is called a random intercept model. 
-#In this model, we account for baseline-differences in total attended, but we assume that
-#whatever the effect of treatment is, it’s going to be the same for all subjects and items.
-
-#But is that a valid assumption? often times it’s not – it is quite expected
-#that some district-id would elicit more or less treatments. That is, the effect of
-#providing meals might be different for different district-id.
 
 ```
 
+You see that each district is assigned a different intercept given that we’ve told the 
+model with “(1|district_id)” Note also that the fixed effects (treatment and total_enrolled) are all the same for all district_id. Our model is what is called a **random intercept model**. 
+
+In this model, we account for baseline-differences in total attended, but we assume that
+whatever the effect of treatment is, it’s going to be the same for all subjects and items.
+
+But is that a valid assumption? often times it’s not – it is quite expected
+that some district-id would elicit more or less treatments. That is, the effect of
+providing meals might be different for different district-id.
+
+### 4.Random slope model
+
+Thus what we need is a random slope model, where district_id is not only allowed to have differing intercepts,but where they are also allowed to have different slopes for the effect of providing meals.
+
+The notation “(1+treatment | district_id)” means that you tell the model to expect differing baseline-levels of (the intercept, represented by 1) as well as differing responses to the main factor which is “treatment” in this case
+
 ```{r Random slopes}
-#Thus what we need is a random slope model, where district_id is not only allowed to have 
-#differing intercepts,but where they are also allowed to have different slopes for the 
-#effect of providing meals
 
 lmmtreatmentRS <- lmer(total_attended ~ treatment + total_enrolled + 
         (1+treatment|district_id), data = ds_sdmerger1, REML = FALSE)
 summary(lmmtreatmentRS)
 
-lmmtreatmentRS.null <- lmer(total_attended ~ total_enrolled + (1+treatment|district_id), 
-        data = ds_sdmerger1, REML = FALSE)
-summary(lmmtreatmentRS.null)
-
-#The notation “(1+treatment | district_id)” means that you tell the model to expect differing 
-#baseline-levels of total_attended (the intercept, represented by 1) as well as differing
-#responses to the main factor which is “treatment” in this case
-
-anova(lmmtreatmentRS.null,lmmtreatmentRS)
-
-#we conclude that a fixed effect treatment for random slope model is not significant as the 
-#difference between the likelihood of these two models is 0.1254.(greater than 0.05)
-
-coef(lmmtreatmentRS)
+anova(lmmtreatmentRS)
 
 ```
+
+
+```{r}
+Anova(lmmtreatmentRS)
+```
+
+
+The random effects for treatment is 578.4 with p-value about 0.1182. It is not significant  Therefore, there is no individual difference in the (slope). This indicates that the different districts have the same treatment outcome.
+
 
 
 
