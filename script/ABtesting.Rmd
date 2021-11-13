@@ -160,7 +160,7 @@ ds_sdmerge <- arrange(ds_sdmerge,district_id,desc(total_enrolled))
 
 
 ds_sdmerger <- ds_sdmerge %>% 
-  group_by(district_id) %>% 
+  group_by(district_id, treatment) %>% 
   mutate(school_id = rank(desc(total_enrolled), ties.method = "first"))
 
 View(ds_sdmerger)
@@ -356,11 +356,10 @@ H1 (called the alternative hypothesis): There exist a relationship between the t
 
 ```{r lmmfull}
 
-lmmtreatment <- lmer(total_attended ~ treatment + total_enrolled + (1 | district_id), 
+lmmtreatment <- lmer(total_attended ~ treatment_type + total_enrolled + (1 | district_id), 
                           data = ds_sdmerger1, REML = FALSE)
 summary(lmmtreatment)
 
-anova(lmmtreatment)
 
 ```
 
@@ -373,19 +372,19 @@ The fixed effects for total_enrolled(0.05785, t-value=15.131) and treatment(8.40
 
 
 ```{r lmm}
-lmmtreat <- lmer(total_attended ~ treatment + (1 | district_id), 
+lmmtreat <- lmer(total_attended ~ treatment_type + (1 | district_id), 
                           data = ds_sdmerger1, REML = FALSE)
 summary(lmmtreat)
 
-anova(lmmtreat)
 
 ```
+
 
 ```{r}
 Anova(lmmtreat)
 ```
 
-The fixed effects for treatment(7.691, t-value=2.2.171) is significant, therefore, there is a linear growth trend in both. The average intercept is 463.09
+The fixed effects for treatment(7.691, t-value=2.171) is significant, therefore, there is a linear growth trend in both. The average intercept is 463.09
 
 The coefficient “treatment” is the slope for the categorical effect of providing meals. 7.691 means that to go from “control” to “treatment”, total attendance increases by around 8 pupils. attendance is lower in control(no meals provided) than in treatment(meals provided), by about 8 pupils.
 
@@ -457,12 +456,15 @@ The notation “(1+treatment | district_id)” means that you tell the model to 
 
 ```{r Random slopes}
 
-lmmtreatmentRS <- lmer(total_attended ~ treatment + total_enrolled + 
-        (1+treatment|district_id), data = ds_sdmerger1, REML = FALSE)
+lmmtreatmentRS <- lmer(total_attended ~ treatment_type + total_enrolled + 
+        (1+treatment_type|district_id), data = ds_sdmerger1, REML = FALSE)
 summary(lmmtreatmentRS)
 
-anova(lmmtreatmentRS)
 
+```
+
+```{r}
+anova(lmmtreatment, lmmtreatmentRS)
 ```
 
 
@@ -471,10 +473,15 @@ Anova(lmmtreatmentRS)
 ```
 
 
-The random effects for treatment is 578.4 with p-value about 0.1182. It is not significant  Therefore, there is no individual difference in the (slope). This indicates that the different districts have the same treatment outcome.
+The random effects for treatment is 578.4 with p-value about 0.1182. It is not significant  Therefore, there is no individual difference in the (slope). This indicates that the different districts have the same treatment effect.
 
 
+```{r Slope intercepts}
 
+coef(lmmtreatmentRS)
+
+
+```
 
 
 

@@ -1,7 +1,7 @@
 ---
 title: "AB_Testing"
 author: "Reinp"
-date: "2021-08-06"
+date: "2021-11-13"
 output:
   html_document: 
     keep_md: yes
@@ -242,7 +242,7 @@ ds_sdmerge <- arrange(ds_sdmerge,district_id,desc(total_enrolled))
 
 
 ds_sdmerger <- ds_sdmerge %>% 
-  group_by(district_id) %>% 
+  group_by(district_id, treatment) %>% 
   mutate(school_id = rank(desc(total_enrolled), ties.method = "first"))
 
 View(ds_sdmerger)
@@ -251,7 +251,7 @@ head(ds_sdmerger)
 
 ```
 ## # A tibble: 6 x 10
-## # Groups:   district_id [1]
+## # Groups:   district_id, treatment [2]
 ##   district_id attended_male attended_female enrolled_male_stu~ enrolled_female_~
 ##         <dbl>         <dbl>           <dbl>              <dbl>             <dbl>
 ## 1           3           212             177               1020               959
@@ -270,7 +270,7 @@ tail(ds_sdmerger)
 
 ```
 ## # A tibble: 6 x 10
-## # Groups:   district_id [1]
+## # Groups:   district_id, treatment [2]
 ##   district_id attended_male attended_female enrolled_male_stu~ enrolled_female_~
 ##         <dbl>         <dbl>           <dbl>              <dbl>             <dbl>
 ## 1         108           118              97                136               110
@@ -301,7 +301,7 @@ describe(ds_sdmerger)
 ## District Name*              7 6970  13.84   7.95   14.0   13.82  10.38     1
 ## total_enrolled              8 6970 970.66 485.92  870.5  946.60 496.67 -1998
 ## total_attended              9 6970 464.93 153.75  456.0  458.95 157.16     0
-## school_id                  10 6970 130.90  76.85  130.0  129.61  96.37     1
+## school_id                  10 6970  65.70  38.43   65.0   65.06  47.44     1
 ##                           max range  skew kurtosis   se
 ## district_id               108   105 -0.15    -0.92 0.37
 ## attended_male             597   597  0.39     0.09 1.03
@@ -312,7 +312,7 @@ describe(ds_sdmerger)
 ## District Name*             27    26  0.01    -1.26 0.10
 ## total_enrolled           1999  3997 -0.26     3.07 5.82
 ## total_attended           1045  1045  0.36     0.03 1.84
-## school_id                 319   318  0.11    -1.04 0.92
+## school_id                 161   160  0.11    -1.04 0.46
 ```
 
 ```r
@@ -349,7 +349,7 @@ describe(ds_sdmerger1)
 ## District Name*              7 6948  13.83   7.94   14.0   13.81  10.38   1   27
 ## total_enrolled              8 6948 980.06 457.02  873.5  948.68 495.93 204 1999
 ## total_attended              9 6948 465.13 153.72  456.0  459.11 157.16   0 1045
-## school_id                  10 6948 130.49  76.62  129.0  129.21  94.89   1  319
+## school_id                  10 6948  65.50  38.31   65.0   64.85  47.44   1  161
 ##                          range  skew kurtosis   se
 ## district_id                105 -0.15    -0.92 0.37
 ## attended_male              597  0.40     0.08 1.03
@@ -360,7 +360,7 @@ describe(ds_sdmerger1)
 ## District Name*              26  0.02    -1.26 0.10
 ## total_enrolled            1795  0.49    -0.90 5.48
 ## total_attended            1045  0.37     0.03 1.84
-## school_id                  318  0.11    -1.04 0.92
+## school_id                  160  0.11    -1.04 0.46
 ```
 
 
@@ -639,7 +639,7 @@ H1 (called the alternative hypothesis): There exist a relationship between the t
 
 
 ```r
-lmmtreatment <- lmer(total_attended ~ treatment + total_enrolled + (1 | district_id), 
+lmmtreatment <- lmer(total_attended ~ treatment_type + total_enrolled + (1 | district_id), 
                           data = ds_sdmerger1, REML = FALSE)
 summary(lmmtreatment)
 ```
@@ -647,7 +647,7 @@ summary(lmmtreatment)
 ```
 ## Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite's
 ##   method [lmerModLmerTest]
-## Formula: total_attended ~ treatment + total_enrolled + (1 | district_id)
+## Formula: total_attended ~ treatment_type + total_enrolled + (1 | district_id)
 ##    Data: ds_sdmerger1
 ## 
 ##      AIC      BIC   logLik deviance df.resid 
@@ -664,30 +664,17 @@ summary(lmmtreatment)
 ## Number of obs: 6948, groups:  district_id, 27
 ## 
 ## Fixed effects:
-##                 Estimate Std. Error        df t value Pr(>|t|)    
-## (Intercept)    4.060e+02  9.320e+00 4.184e+01  43.558   <2e-16 ***
-## treatment      8.406e+00  3.486e+00 6.921e+03   2.411   0.0159 *  
-## total_enrolled 5.785e-02  3.823e-03 6.924e+03  15.131   <2e-16 ***
+##                          Estimate Std. Error        df t value Pr(>|t|)    
+## (Intercept)             4.060e+02  9.320e+00 4.184e+01  43.558   <2e-16 ***
+## treatment_typetreatment 8.406e+00  3.486e+00 6.921e+03   2.411   0.0159 *  
+## total_enrolled          5.785e-02  3.823e-03 6.924e+03  15.131   <2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## Correlation of Fixed Effects:
-##             (Intr) trtmnt
-## treatment   -0.191       
+##             (Intr) trtmn_
+## trtmnt_typt -0.191       
 ## total_nrlld -0.405  0.014
-```
-
-```r
-anova(lmmtreatment)
-```
-
-```
-## Type III Analysis of Variance Table with Satterthwaite's method
-##                 Sum Sq Mean Sq NumDF  DenDF F value  Pr(>F)    
-## treatment       122696  122696     1 6920.9   5.814 0.01592 *  
-## total_enrolled 4831753 4831753     1 6924.0 228.955 < 2e-16 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 
@@ -701,7 +688,7 @@ Anova(lmmtreatment)
 ## 
 ## Response: total_attended
 ##                  Chisq Df Pr(>Chisq)    
-## treatment        5.814  1     0.0159 *  
+## treatment_type   5.814  1     0.0159 *  
 ## total_enrolled 228.955  1     <2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
@@ -712,7 +699,7 @@ The fixed effects for total_enrolled(0.05785, t-value=15.131) and treatment(8.40
 
 
 ```r
-lmmtreat <- lmer(total_attended ~ treatment + (1 | district_id), 
+lmmtreat <- lmer(total_attended ~ treatment_type + (1 | district_id), 
                           data = ds_sdmerger1, REML = FALSE)
 summary(lmmtreat)
 ```
@@ -720,7 +707,7 @@ summary(lmmtreat)
 ```
 ## Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite's
 ##   method [lmerModLmerTest]
-## Formula: total_attended ~ treatment + (1 | district_id)
+## Formula: total_attended ~ treatment_type + (1 | district_id)
 ##    Data: ds_sdmerger1
 ## 
 ##      AIC      BIC   logLik deviance df.resid 
@@ -737,28 +724,17 @@ summary(lmmtreat)
 ## Number of obs: 6948, groups:  district_id, 27
 ## 
 ## Fixed effects:
-##             Estimate Std. Error       df t value Pr(>|t|)    
-## (Intercept)  463.090      8.766   29.196  52.830   <2e-16 ***
-## treatment      7.691      3.542 6920.905   2.171     0.03 *  
+##                         Estimate Std. Error       df t value Pr(>|t|)    
+## (Intercept)              463.090      8.766   29.196  52.830   <2e-16 ***
+## treatment_typetreatment    7.691      3.542 6920.905   2.171     0.03 *  
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## Correlation of Fixed Effects:
-##           (Intr)
-## treatment -0.201
+##             (Intr)
+## trtmnt_typt -0.201
 ```
 
-```r
-anova(lmmtreat)
-```
-
-```
-## Type III Analysis of Variance Table with Satterthwaite's method
-##           Sum Sq Mean Sq NumDF  DenDF F value  Pr(>F)  
-## treatment 102740  102740     1 6920.9  4.7136 0.02996 *
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-```
 
 
 ```r
@@ -769,13 +745,13 @@ Anova(lmmtreat)
 ## Analysis of Deviance Table (Type II Wald chisquare tests)
 ## 
 ## Response: total_attended
-##            Chisq Df Pr(>Chisq)  
-## treatment 4.7136  1    0.02993 *
+##                 Chisq Df Pr(>Chisq)  
+## treatment_type 4.7136  1    0.02993 *
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-The fixed effects for treatment(7.691, t-value=2.2.171) is significant, therefore, there is a linear growth trend in both. The average intercept is 463.09
+The fixed effects for treatment(7.691, t-value=2.171) is significant, therefore, there is a linear growth trend in both. The average intercept is 463.09
 
 The coefficient “treatment” is the slope for the categorical effect of providing meals. 7.691 means that to go from “control” to “treatment”, total attendance increases by around 8 pupils. attendance is lower in control(no meals provided) than in treatment(meals provided), by about 8 pupils.
 
@@ -815,7 +791,7 @@ anova(lmmtreatment.null,lmmtreatment)
 ## Data: ds_sdmerger1
 ## Models:
 ## lmmtreatment.null: total_attended ~ total_enrolled + (1 | district_id)
-## lmmtreatment: total_attended ~ treatment + total_enrolled + (1 | district_id)
+## lmmtreatment: total_attended ~ treatment_type + total_enrolled + (1 | district_id)
 ##                   npar   AIC   BIC logLik deviance  Chisq Df Pr(>Chisq)  
 ## lmmtreatment.null    4 88998 89026 -44495    88990                       
 ## lmmtreatment         5 88995 89029 -44492    88985 5.8116  1    0.01592 *
@@ -840,34 +816,34 @@ coef(lmmtreatment)
 
 ```
 ## $district_id
-##     (Intercept) treatment total_enrolled
-## 3      345.5238  8.405591      0.0578538
-## 5      373.2582  8.405591      0.0578538
-## 6      391.9255  8.405591      0.0578538
-## 16     375.2961  8.405591      0.0578538
-## 17     445.5645  8.405591      0.0578538
-## 22     427.8311  8.405591      0.0578538
-## 39     380.9146  8.405591      0.0578538
-## 42     353.3708  8.405591      0.0578538
-## 43     449.6900  8.405591      0.0578538
-## 44     410.6224  8.405591      0.0578538
-## 47     507.9889  8.405591      0.0578538
-## 50     449.4153  8.405591      0.0578538
-## 57     429.5080  8.405591      0.0578538
-## 58     417.6187  8.405591      0.0578538
-## 62     424.2424  8.405591      0.0578538
-## 65     382.6116  8.405591      0.0578538
-## 67     396.6649  8.405591      0.0578538
-## 68     353.9196  8.405591      0.0578538
-## 77     405.3434  8.405591      0.0578538
-## 78     340.3057  8.405591      0.0578538
-## 79     410.7081  8.405591      0.0578538
-## 80     378.1203  8.405591      0.0578538
-## 93     464.7975  8.405591      0.0578538
-## 97     446.7653  8.405591      0.0578538
-## 104    463.5627  8.405591      0.0578538
-## 107    369.6693  8.405591      0.0578538
-## 108    365.8604  8.405591      0.0578538
+##     (Intercept) treatment_typetreatment total_enrolled
+## 3      345.5238                8.405591      0.0578538
+## 5      373.2582                8.405591      0.0578538
+## 6      391.9255                8.405591      0.0578538
+## 16     375.2961                8.405591      0.0578538
+## 17     445.5645                8.405591      0.0578538
+## 22     427.8311                8.405591      0.0578538
+## 39     380.9146                8.405591      0.0578538
+## 42     353.3708                8.405591      0.0578538
+## 43     449.6900                8.405591      0.0578538
+## 44     410.6224                8.405591      0.0578538
+## 47     507.9889                8.405591      0.0578538
+## 50     449.4153                8.405591      0.0578538
+## 57     429.5080                8.405591      0.0578538
+## 58     417.6187                8.405591      0.0578538
+## 62     424.2424                8.405591      0.0578538
+## 65     382.6116                8.405591      0.0578538
+## 67     396.6649                8.405591      0.0578538
+## 68     353.9196                8.405591      0.0578538
+## 77     405.3434                8.405591      0.0578538
+## 78     340.3057                8.405591      0.0578538
+## 79     410.7081                8.405591      0.0578538
+## 80     378.1203                8.405591      0.0578538
+## 93     464.7975                8.405591      0.0578538
+## 97     446.7653                8.405591      0.0578538
+## 104    463.5627                8.405591      0.0578538
+## 107    369.6693                8.405591      0.0578538
+## 108    365.8604                8.405591      0.0578538
 ## 
 ## attr(,"class")
 ## [1] "coef.mer"
@@ -891,15 +867,16 @@ The notation “(1+treatment | district_id)” means that you tell the model to 
 
 
 ```r
-lmmtreatmentRS <- lmer(total_attended ~ treatment + total_enrolled + 
-        (1+treatment|district_id), data = ds_sdmerger1, REML = FALSE)
+lmmtreatmentRS <- lmer(total_attended ~ treatment_type + total_enrolled + 
+        (1+treatment_type|district_id), data = ds_sdmerger1, REML = FALSE)
 summary(lmmtreatmentRS)
 ```
 
 ```
 ## Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite's
 ##   method [lmerModLmerTest]
-## Formula: total_attended ~ treatment + total_enrolled + (1 + treatment |  
+## Formula: 
+## total_attended ~ treatment_type + total_enrolled + (1 + treatment_type |  
 ##     district_id)
 ##    Data: ds_sdmerger1
 ## 
@@ -911,35 +888,39 @@ summary(lmmtreatmentRS)
 ## -3.5108 -0.7124 -0.0544  0.6558  3.7093 
 ## 
 ## Random effects:
-##  Groups      Name        Variance Std.Dev. Corr
-##  district_id (Intercept)  1643.7   40.54       
-##              treatment     578.4   24.05   0.01
-##  Residual                20959.0  144.77       
+##  Groups      Name                    Variance Std.Dev. Corr
+##  district_id (Intercept)              1643.7   40.54       
+##              treatment_typetreatment   578.4   24.05   0.01
+##  Residual                            20959.0  144.77       
 ## Number of obs: 6948, groups:  district_id, 27
 ## 
 ## Fixed effects:
-##                 Estimate Std. Error        df t value Pr(>|t|)    
-## (Intercept)    4.061e+02  9.007e+00 3.928e+01  45.084   <2e-16 ***
-## treatment      9.052e+00  5.794e+00 2.688e+01   1.562     0.13    
-## total_enrolled 5.743e-02  3.816e-03 6.916e+03  15.049   <2e-16 ***
+##                          Estimate Std. Error        df t value Pr(>|t|)    
+## (Intercept)             4.061e+02  9.007e+00 3.928e+01  45.084   <2e-16 ***
+## treatment_typetreatment 9.052e+00  5.794e+00 2.688e+01   1.562     0.13    
+## total_enrolled          5.743e-02  3.816e-03 6.916e+03  15.049   <2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## Correlation of Fixed Effects:
-##             (Intr) trtmnt
-## treatment   -0.111       
+##             (Intr) trtmn_
+## trtmnt_typt -0.111       
 ## total_nrlld -0.418  0.008
 ```
 
+
 ```r
-anova(lmmtreatmentRS)
+anova(lmmtreatment, lmmtreatmentRS)
 ```
 
 ```
-## Type III Analysis of Variance Table with Satterthwaite's method
-##                 Sum Sq Mean Sq NumDF  DenDF  F value Pr(>F)    
-## treatment        51156   51156     1   26.9   2.4408 0.1299    
-## total_enrolled 4746576 4746576     1 6915.9 226.4700 <2e-16 ***
+## Data: ds_sdmerger1
+## Models:
+## lmmtreatment: total_attended ~ treatment_type + total_enrolled + (1 | district_id)
+## lmmtreatmentRS: total_attended ~ treatment_type + total_enrolled + (1 + treatment_type | district_id)
+##                npar   AIC   BIC logLik deviance  Chisq Df Pr(>Chisq)    
+## lmmtreatment      5 88995 89029 -44492    88985                         
+## lmmtreatmentRS    7 88977 89025 -44482    88963 21.501  2  2.143e-05 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -955,17 +936,55 @@ Anova(lmmtreatmentRS)
 ## 
 ## Response: total_attended
 ##                   Chisq Df Pr(>Chisq)    
-## treatment        2.4408  1     0.1182    
+## treatment_type   2.4408  1     0.1182    
 ## total_enrolled 226.4700  1     <2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 
-The random effects for treatment is 578.4 with p-value about 0.1182. It is not significant  Therefore, there is no individual difference in the (slope). This indicates that the different districts have the same treatment outcome.
+The random effects for treatment is 578.4 with p-value about 0.1182. It is not significant  Therefore, there is no individual difference in the (slope). This indicates that the different districts have the same treatment effect.
 
 
 
+```r
+coef(lmmtreatmentRS)
+```
+
+```
+## $district_id
+##     (Intercept) treatment_typetreatment total_enrolled
+## 3      340.7621              19.9021088     0.05742947
+## 5      374.0672               7.7820314     0.05742947
+## 6      380.0712              34.5099362     0.05742947
+## 16     384.1282              -9.0841655     0.05742947
+## 17     447.6537               4.4681956     0.05742947
+## 22     416.4717              33.4256029     0.05742947
+## 39     380.9118               9.4537385     0.05742947
+## 42     356.5562               2.9167096     0.05742947
+## 43     460.0651             -13.1021611     0.05742947
+## 44     424.7478             -20.6504402     0.05742947
+## 47     501.1083              22.9982718     0.05742947
+## 50     441.6161              25.4786518     0.05742947
+## 57     421.2400              26.3587508     0.05742947
+## 58     433.7818             -25.0150803     0.05742947
+## 62     414.4051              29.8114630     0.05742947
+## 65     383.3124               7.9127314     0.05742947
+## 67     400.9756               0.2866173     0.05742947
+## 68     357.2551               2.6064692     0.05742947
+## 77     403.1450              13.8545405     0.05742947
+## 78     356.9068             -25.3765606     0.05742947
+## 79     422.9093             -16.4483004     0.05742947
+## 80     386.7669              -8.6627213     0.05742947
+## 93     457.3294              24.7576474     0.05742947
+## 97     427.9750              49.0141645     0.05742947
+## 104    457.9225              20.7703352     0.05742947
+## 107    361.6458              26.5974243     0.05742947
+## 108    370.4186              -0.1722125     0.05742947
+## 
+## attr(,"class")
+## [1] "coef.mer"
+```
 
 
 
